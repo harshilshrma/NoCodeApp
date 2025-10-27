@@ -6,9 +6,6 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   addEdge,
-  Connection,
-  Edge,
-  Node,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 
@@ -49,7 +46,7 @@ function WorkflowBuilder({ onBack }) {
   const [selectedComponent, setSelectedComponent] = useState(null)
 
   const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
+    (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   )
 
@@ -84,29 +81,47 @@ function WorkflowBuilder({ onBack }) {
     <div className="workflow-builder">
       <div className="builder-header">
         <div className="header-left">
-          <button className="back-btn" onClick={onBack}>← Back</button>
-          <h2>Workflow Builder</h2>
+          <div className="logo">
+            <div className="logo-icon">ai</div>
+            <span className="logo-text">GenAI Stack</span>
+          </div>
         </div>
         <div className="builder-actions">
-          <button className="btn-secondary">Build Stack</button>
-          <button className="btn-primary">Chat with Stack</button>
+          <button className="save-btn">
+            <span className="save-icon">💾</span>
+            Save
+          </button>
+          <div className="user-avatar">S</div>
         </div>
       </div>
 
       <div className="builder-content">
         {/* Component Library */}
         <div className="component-library">
-          <h3>Components</h3>
+          <div className="library-header">
+            <h3>Chat With AI</h3>
+            <button className="doc-btn">📄</button>
+          </div>
+          <h4>Components</h4>
           <div className="component-list">
             {componentTypes.map((component) => (
               <div
                 key={component.id}
                 className="component-item"
                 onClick={() => addNode(component)}
-                style={{ borderLeftColor: component.color }}
+                draggable
               >
-                <div className="component-name">{component.name}</div>
-                <div className="component-description">{component.description}</div>
+                <div className="component-icon">
+                  {component.id === 'user-query' && '📄'}
+                  {component.id === 'knowledge-base' && '📚'}
+                  {component.id === 'llm-engine' && '✨'}
+                  {component.id === 'output' && '📤'}
+                </div>
+                <div className="component-info">
+                  <div className="component-name">{component.name}</div>
+                  {component.id === 'llm-engine' && <div className="component-subtitle">(OpenAI)</div>}
+                </div>
+                <div className="reorder-icon">⋮⋮⋮</div>
               </div>
             ))}
           </div>
@@ -114,19 +129,42 @@ function WorkflowBuilder({ onBack }) {
 
         {/* Workflow Canvas */}
         <div className="workflow-canvas">
-          <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodeClick={onNodeClick}
-            fitView
-          >
-            <Controls />
-            <MiniMap />
-            <Background variant="dots" gap={12} size={1} />
-          </ReactFlow>
+          {nodes.length === 0 ? (
+            <div className="empty-canvas">
+              <div className="empty-icon">⬜</div>
+              <p>Drag & drop to get started</p>
+            </div>
+          ) : (
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              onNodeClick={onNodeClick}
+              fitView
+            >
+              <Controls />
+              <MiniMap />
+              <Background variant="dots" gap={12} size={1} />
+            </ReactFlow>
+          )}
+          
+          {/* Zoom Controls */}
+          <div className="zoom-controls">
+            <button className="zoom-btn">+</button>
+            <button className="zoom-btn">-</button>
+            <button className="zoom-btn">⛶</button>
+            <select className="zoom-select">
+              <option>100%</option>
+            </select>
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="action-buttons">
+            <button className="play-btn">▶</button>
+            <button className="chat-btn">💬</button>
+          </div>
         </div>
 
         {/* Component Configuration */}
