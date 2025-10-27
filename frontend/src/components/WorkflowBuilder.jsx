@@ -299,11 +299,13 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            fitView
+            fitView={nodes.length > 0}
             proOptions={{ hideAttribution: true }}
             nodeTypes={nodeTypes}
             style={{ width: '100%', height: '100%' }}
-            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+            defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+            minZoom={0.1}
+            maxZoom={2}
           >
             <Controls />
             <Background variant="dots" gap={12} size={1} color="#e0e0e0" />
