@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import WorkflowBuilder from './components/WorkflowBuilder'
+import { Trash2 } from 'lucide-react'
 import axios from 'axios'
 import './App.css'
 import './components/WorkflowBuilder.css'
@@ -86,6 +87,19 @@ function App() {
     setCurrentView('home')
   }
 
+  const handleDeleteStack = async (stackId) => {
+    if (window.confirm('Are you sure you want to delete this stack? This action cannot be undone.')) {
+      try {
+        await axios.delete(`http://127.0.0.1:8000/stacks/${stackId}`)
+        setStacks(prevStacks => prevStacks.filter(stack => stack.id !== stackId))
+        alert('Stack deleted successfully!')
+      } catch (error) {
+        console.error('Error deleting stack:', error)
+        alert('Failed to delete stack. Please try again.')
+      }
+    }
+  }
+
   const handleCloseModal = () => {
     setShowCreateModal(false)
     setNewStackName('')
@@ -137,13 +151,22 @@ function App() {
             <div key={stack.id} className="stack-card">
               <h3 className="stack-title">{stack.name}</h3>
               <p className="stack-description">{stack.description}</p>
-              <button
-                className="edit-stack-btn"
-                onClick={() => handleEditStack(stack.id)}
-              >
-                Edit Stack
-                <span className="edit-icon">↗</span>
-              </button>
+              <div className="stack-actions">
+                <button
+                  className="edit-stack-btn"
+                  onClick={() => handleEditStack(stack.id)}
+                >
+                  Edit Stack
+                  <span className="edit-icon">↗</span>
+                </button>
+                <button
+                  className="delete-stack-btn"
+                  onClick={() => handleDeleteStack(stack.id)}
+                  title="Delete Stack"
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
             </div>
           ))}
         </div>

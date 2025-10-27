@@ -5,14 +5,18 @@ import { Position } from 'reactflow';
 import NodeBase from './NodeBase';
 import { MdInput } from "react-icons/md";
 
-export const UserInputNode = ({ id, data }) => {
+export const UserInputNode = ({ id, data, onDelete }) => {
   const [currName, setCurrName] = useState(data?.inputName || id.replace('user-input-', 'user_input_'));
   const [inputType, setInputType] = useState(data?.inputType || 'Text');
   const [query, setQuery] = useState(data?.query || '');
 
   const handleDelete = () => {
-    // This will be handled by the parent component
-    console.log('Delete user input node:', id);
+    console.log('UserInputNode handleDelete called for:', id)
+    if (onDelete) {
+      onDelete(id);
+    } else {
+      console.log('onDelete prop not provided')
+    }
   };
 
   return (

@@ -4,7 +4,9 @@
   border-radius: 8px;
   background: #fff;
   box-shadow: 0 2px 8px #eee;
-  transition: box-shadow 0.3s, border-color 0.3s;
+  transition: box-shadow 0.3s, border-color 0.3s, transform 0.2s ease;
+  pointer-events: auto;
+  position: relative;
 }
 
 .node-header {
@@ -145,7 +147,9 @@
 }
 
 .node-base:hover {
-  border: 1px solid #6366f1;
-  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18), 0 2px 16px #b3b3fa;
-  z-index: 2;
+  border: 1px solid #6366f1 !important;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18), 0 2px 16px #b3b3fa !important;
+  z-index: 2 !important;
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
 }

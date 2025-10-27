@@ -5,13 +5,15 @@ import { Position } from 'reactflow';
 import NodeBase from './NodeBase';
 import { MdOutlineOutput } from "react-icons/md";
 
-export const OutputNode = ({ id, data }) => {
+export const OutputNode = ({ id, data, onDelete }) => {
   const [currName, setCurrName] = useState(data?.outputName || id.replace('output-', 'output_'));
   const [outputType, setOutputType] = useState(data?.outputType || 'Text');
   const [response, setResponse] = useState(data?.response || '');
 
   const handleDelete = () => {
-    console.log('Delete output node:', id);
+    if (onDelete) {
+      onDelete(id);
+    }
   };
 
   return (

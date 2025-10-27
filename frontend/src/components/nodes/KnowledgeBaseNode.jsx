@@ -5,7 +5,7 @@ import { Position } from 'reactflow';
 import NodeBase from './NodeBase';
 import { MdLibraryBooks } from "react-icons/md";
 
-export const KnowledgeBaseNode = ({ id, data }) => {
+export const KnowledgeBaseNode = ({ id, data, onDelete }) => {
   const [currName, setCurrName] = useState(data?.kbName || id.replace('knowledge-base-', 'kb_'));
   const [embeddingModel, setEmbeddingModel] = useState(data?.embeddingModel || 'text-embedding-3-large');
   const [apiKey, setApiKey] = useState(data?.apiKey || '');
@@ -13,7 +13,9 @@ export const KnowledgeBaseNode = ({ id, data }) => {
   const [similarityThreshold, setSimilarityThreshold] = useState(data?.similarityThreshold || 0.7);
 
   const handleDelete = () => {
-    console.log('Delete knowledge base node:', id);
+    if (onDelete) {
+      onDelete(id);
+    }
   };
 
   return (

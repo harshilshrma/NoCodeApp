@@ -63,6 +63,25 @@ async def get_stack(stack_id: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Stack not found")
     return stack
 
+@app.delete("/stacks/{stack_id}")
+async def delete_stack(stack_id: str, db: Session = Depends(get_db)):
+    # Check if stack exists
+    stack = db.query(Stack).filter(Stack.id == stack_id).first()
+    if not stack:
+        raise HTTPException(status_code=404, detail="Stack not found")
+    
+    # Delete associated workflows
+    db.query(Workflow).filter(Workflow.stack_id == stack_id).delete()
+    
+    # Delete associated chat logs
+    db.query(ChatLog).filter(ChatLog.stack_id == stack_id).delete()
+    
+    # Delete the stack
+    db.delete(stack)
+    db.commit()
+    
+    return {"message": "Stack deleted successfully"}
+
 # Workflow endpoints
 @app.post("/workflows", response_model=WorkflowResponse)
 async def save_workflow(workflow: WorkflowCreate, db: Session = Depends(get_db)):

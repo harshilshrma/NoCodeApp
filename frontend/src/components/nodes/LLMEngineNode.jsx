@@ -7,7 +7,7 @@ import { SiOpenai } from "react-icons/si";
 
 const MODELS = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'];
 
-export const LLMEngineNode = ({ id, data }) => {
+export const LLMEngineNode = ({ id, data, onDelete }) => {
   const [currName, setCurrName] = useState(data?.llmName || id.replace('llm-engine-', 'llm_'));
   const [model, setModel] = useState(data?.model || MODELS[0]);
   const [apiKey, setApiKey] = useState(data?.apiKey || '');
@@ -17,7 +17,9 @@ export const LLMEngineNode = ({ id, data }) => {
   const [serpApiKey, setSerpApiKey] = useState(data?.serpApiKey || '');
 
   const handleDelete = () => {
-    console.log('Delete LLM engine node:', id);
+    if (onDelete) {
+      onDelete(id);
+    }
   };
 
   return (

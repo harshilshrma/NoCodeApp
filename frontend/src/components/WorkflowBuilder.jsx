@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 import ReactFlow, {
   Controls,
   Background,
@@ -18,16 +18,6 @@ import { UserInputNode } from './nodes/UserInputNode'
 import { KnowledgeBaseNode } from './nodes/KnowledgeBaseNode'
 import { LLMEngineNode } from './nodes/LLMEngineNode'
 import { OutputNode } from './nodes/OutputNode'
-
-// Define custom node types for React Flow
-const nodeTypes = {
-  'user-input': UserInputNode,
-  'knowledge-base': KnowledgeBaseNode,
-  'llm-engine': LLMEngineNode,
-  'output': OutputNode,
-}
-
-console.log('Node types loaded:', nodeTypes)
 
 // Component types
 const componentTypes = [
@@ -67,7 +57,23 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
 
   console.log('Current nodes:', nodes)
   console.log('Current edges:', edges)
-  console.log('Node types:', nodeTypes)
+
+  // Handle node deletion
+  const handleNodeDelete = useCallback((nodeId) => {
+    console.log('Deleting node:', nodeId)
+    setNodes((nds) => nds.filter((node) => node.id !== nodeId))
+    setEdges((eds) => eds.filter((edge) => edge.source !== nodeId && edge.target !== nodeId))
+  }, [setNodes, setEdges])
+
+  // Define custom node types for React Flow with deletion handlers
+  const nodeTypes = useMemo(() => ({
+    'user-input': (props) => <UserInputNode {...props} onDelete={handleNodeDelete} />,
+    'knowledge-base': (props) => <KnowledgeBaseNode {...props} onDelete={handleNodeDelete} />,
+    'llm-engine': (props) => <LLMEngineNode {...props} onDelete={handleNodeDelete} />,
+    'output': (props) => <OutputNode {...props} onDelete={handleNodeDelete} />,
+  }), [handleNodeDelete])
+
+  console.log('Node types loaded:', nodeTypes)
 
   const loadWorkflow = useCallback(async () => {
     try {

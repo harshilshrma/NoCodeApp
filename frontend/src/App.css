@@ -198,6 +198,13 @@ body {
   line-height: 1.5;
 }
 
+.stack-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-content: flex-end;
+}
+
 .edit-stack-btn {
   background: #f8f9fa;
   color: #6b7280;
@@ -211,13 +218,34 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-left: auto;
   width: fit-content;
 }
 
 .edit-stack-btn:hover {
   background: #e9ecef;
   color: #374151;
+}
+
+.delete-stack-btn {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+}
+
+.delete-stack-btn:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
 }
 
 .edit-icon {
