@@ -9,32 +9,47 @@ import ReactFlow, {
 import { Save } from 'lucide-react'
 import axios from 'axios'
 import 'reactflow/dist/style.css'
+import './nodes/NodeStyles.css'
+
+// Import custom node components
+import UserInputNode from './nodes/UserInputNode'
+import KnowledgeBaseNode from './nodes/KnowledgeBaseNode'
+import LLMEngineNode from './nodes/LLMEngineNode'
+import OutputNode from './nodes/OutputNode'
+
+// Define custom node types for React Flow
+const nodeTypes = {
+  'user-input': UserInputNode,
+  'knowledge-base': KnowledgeBaseNode,
+  'llm-engine': LLMEngineNode,
+  'output': OutputNode,
+}
 
 // Component types
 const componentTypes = [
   {
-    id: 'user-query',
+    id: 'user-input',
     name: 'User Query',
     description: 'Accepts user queries via a simple interface',
-    color: '#3b82f6',
+    color: '#e3f2fd',
   },
   {
     id: 'knowledge-base',
     name: 'Knowledge Base',
     description: 'Upload and process documents',
-    color: '#10b981',
+    color: '#e8f5e8',
   },
   {
     id: 'llm-engine',
     name: 'LLM Engine',
     description: 'Process queries with language models',
-    color: '#f59e0b',
+    color: '#fff3e0',
   },
   {
     id: 'output',
     name: 'Output',
     description: 'Display responses to users',
-    color: '#ef4444',
+    color: '#fce4ec',
   },
 ]
 
@@ -170,21 +185,13 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
     
     const newNode = {
       id: `${componentType.id}-${Date.now()}`,
-      type: 'default',
+      type: componentType.id, // Use the component type as the node type
       position,
       data: {
         label: componentType.name,
         type: componentType.id,
         description: componentType.description,
         color: componentType.color,
-      },
-      style: {
-        background: componentType.color,
-        color: '#fff',
-        border: '1px solid #222138',
-        width: 150,
-        height: 80,
-        borderRadius: 8,
       },
     }
     setNodes((nds) => [...nds, newNode])
@@ -251,7 +258,7 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
                 }}
               >
                 <div className="component-icon">
-                  {component.id === 'user-query' && '📄'}
+                  {component.id === 'user-input' && '📄'}
                   {component.id === 'knowledge-base' && '📚'}
                   {component.id === 'llm-engine' && '✨'}
                   {component.id === 'output' && '📤'}
@@ -286,6 +293,7 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
               onConnect={onConnect}
               fitView
               proOptions={{ hideAttribution: true }}
+              nodeTypes={nodeTypes}
             >
               <Controls />
               <Background variant="dots" gap={12} size={1} />
