@@ -1,12 +1,12 @@
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 import ReactFlow, {
-  MiniMap,
   Controls,
   Background,
   useNodesState,
   useEdgesState,
   addEdge,
 } from 'reactflow'
+import { Save } from 'lucide-react'
 import 'reactflow/dist/style.css'
 
 // Component types
@@ -43,18 +43,57 @@ const initialEdges = []
 function WorkflowBuilder({ onBack }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
-  const [selectedComponent, setSelectedComponent] = useState(null)
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   )
 
-  const addNode = (componentType) => {
+  const onDragStart = (event, componentType) => {
+    event.dataTransfer.setData('application/reactflow', JSON.stringify(componentType))
+    event.dataTransfer.effectAllowed = 'move'
+    
+    // Add dragging class for visual feedback
+    event.target.classList.add('dragging')
+    
+    // Create a custom drag image
+    const dragImage = event.target.cloneNode(true)
+    dragImage.style.position = 'absolute'
+    dragImage.style.top = '-1000px'
+    dragImage.style.left = '-1000px'
+    dragImage.style.width = '200px'
+    dragImage.style.backgroundColor = 'white'
+    dragImage.style.border = '1px solid #e9ecef'
+    dragImage.style.borderRadius = '8px'
+    dragImage.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)'
+    dragImage.style.padding = '0.75rem'
+    dragImage.style.display = 'flex'
+    dragImage.style.alignItems = 'center'
+    dragImage.style.gap = '0.75rem'
+    
+    document.body.appendChild(dragImage)
+    event.dataTransfer.setDragImage(dragImage, 100, 20)
+    
+    // Clean up after drag starts
+    setTimeout(() => {
+      document.body.removeChild(dragImage)
+    }, 0)
+  }
+
+  const onDrop = (event) => {
+    event.preventDefault()
+    
+    const componentType = JSON.parse(event.dataTransfer.getData('application/reactflow'))
+    
+    const position = {
+      x: event.clientX - 300, // Subtract sidebar width
+      y: event.clientY - 100, // Subtract header height
+    }
+    
     const newNode = {
       id: `${componentType.id}-${Date.now()}`,
       type: 'default',
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      position,
       data: {
         label: componentType.name,
         type: componentType.id,
@@ -73,22 +112,24 @@ function WorkflowBuilder({ onBack }) {
     setNodes((nds) => [...nds, newNode])
   }
 
-  const onNodeClick = (event, node) => {
-    setSelectedComponent(node)
+  const onDragOver = (event) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = 'move'
   }
+
 
   return (
     <div className="workflow-builder">
       <div className="builder-header">
         <div className="header-left">
           <div className="logo">
-            <div className="logo-icon">ai</div>
+            <img src="/logo.png" alt="GenAI Stack Logo" className="logo-icon" />
             <span className="logo-text">GenAI Stack</span>
           </div>
         </div>
         <div className="builder-actions">
           <button className="save-btn">
-            <span className="save-icon">💾</span>
+            <Save size={16} />
             Save
           </button>
           <div className="user-avatar">S</div>
@@ -108,8 +149,11 @@ function WorkflowBuilder({ onBack }) {
               <div
                 key={component.id}
                 className="component-item"
-                onClick={() => addNode(component)}
                 draggable
+                onDragStart={(event) => onDragStart(event, component)}
+                onDragEnd={(event) => {
+                  event.target.classList.remove('dragging')
+                }}
               >
                 <div className="component-icon">
                   {component.id === 'user-query' && '📄'}
@@ -128,7 +172,11 @@ function WorkflowBuilder({ onBack }) {
         </div>
 
         {/* Workflow Canvas */}
-        <div className="workflow-canvas">
+        <div 
+          className="workflow-canvas"
+          onDrop={onDrop}
+          onDragOver={onDragOver}
+        >
           {nodes.length === 0 ? (
             <div className="empty-canvas">
               <div className="empty-icon">⬜</div>
@@ -141,48 +189,15 @@ function WorkflowBuilder({ onBack }) {
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
-              onNodeClick={onNodeClick}
               fitView
+              proOptions={{ hideAttribution: true }}
             >
               <Controls />
-              <MiniMap />
               <Background variant="dots" gap={12} size={1} />
             </ReactFlow>
           )}
-          
-          {/* Zoom Controls */}
-          <div className="zoom-controls">
-            <button className="zoom-btn">+</button>
-            <button className="zoom-btn">-</button>
-            <button className="zoom-btn">⛶</button>
-            <select className="zoom-select">
-              <option>100%</option>
-            </select>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="action-buttons">
-            <button className="play-btn">▶</button>
-            <button className="chat-btn">💬</button>
-          </div>
         </div>
 
-        {/* Component Configuration */}
-        <div className="component-config">
-          <h3>Configuration</h3>
-          {selectedComponent ? (
-            <div className="config-content">
-              <h4>{selectedComponent.data.label}</h4>
-              <p>{selectedComponent.data.description}</p>
-              <div className="config-options">
-                {/* Configuration options will be added based on component type */}
-                <p>Configuration options will appear here based on the selected component.</p>
-              </div>
-            </div>
-          ) : (
-            <p>Select a component to configure it</p>
-          )}
-        </div>
       </div>
     </div>
   )
