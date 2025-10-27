@@ -1,11 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import WorkflowBuilder from './components/WorkflowBuilder'
 import axios from 'axios'
 import './App.css'
 import './components/WorkflowBuilder.css'
 
 function App() {
-  const [stacks] = useState([
+  const [stacks, setStacks] = useState([
     {
       id: 1,
       name: "Chat With AI",
@@ -35,25 +35,54 @@ function App() {
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [newStackName, setNewStackName] = useState('')
   const [newStackDescription, setNewStackDescription] = useState('')
+  const [currentStackId, setCurrentStackId] = useState(null)
+
+  // Load stacks from backend on component mount
+  useEffect(() => {
+    loadStacks()
+  }, [])
+
+  const loadStacks = async () => {
+    try {
+      const response = await axios.get('http://127.0.0.1:8000/stacks')
+      setStacks(response.data)
+    } catch (error) {
+      console.error('Error loading stacks:', error)
+      // Keep the existing dummy data as fallback
+    }
+  }
 
   const handleCreateNewStack = () => {
     setShowCreateModal(true)
   }
 
-  const handleCreateStack = () => {
-    // TODO: Add new stack to the list
-    console.log('Creating stack:', newStackName, newStackDescription)
-    setShowCreateModal(false)
-    setNewStackName('')
-    setNewStackDescription('')
-    setCurrentView('builder')
+  const handleCreateStack = async () => {
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/stacks', {
+        name: newStackName,
+        description: newStackDescription
+      })
+      
+      const newStack = response.data
+      setStacks(prevStacks => [...prevStacks, newStack])
+      setCurrentStackId(newStack.id)
+      setShowCreateModal(false)
+      setNewStackName('')
+      setNewStackDescription('')
+      setCurrentView('builder')
+    } catch (error) {
+      console.error('Error creating stack:', error)
+      alert('Failed to create stack. Please try again.')
+    }
   }
 
   const handleEditStack = (stackId) => {
+    setCurrentStackId(stackId)
     setCurrentView('builder')
   }
 
   const handleBackToHome = () => {
+    setCurrentStackId(null)
     setCurrentView('home')
   }
 
@@ -73,7 +102,8 @@ function App() {
   }
 
   if (currentView === 'builder') {
-    return <WorkflowBuilder onBack={handleBackToHome} />
+    const currentStack = stacks.find(stack => stack.id === currentStackId)
+    return <WorkflowBuilder onBack={handleBackToHome} stackId={currentStackId} stackName={currentStack?.name} />
   }
 
   return (
@@ -81,10 +111,10 @@ function App() {
       {/* Header */}
       <header className="header">
         <div className="logo">
-          <div className="logo-icon">ai</div>
+          <img src="/logo.png" alt="GenAI Stack Logo" className="logo-icon" />
           <span className="logo-text">GenAI Stack</span>
         </div>
-        <div className="user-avatar">S</div>
+        <div className="user-avatar">HS</div>
       </header>
 
       {/* Main Content */}
@@ -107,8 +137,8 @@ function App() {
             <div key={stack.id} className="stack-card">
               <h3 className="stack-title">{stack.name}</h3>
               <p className="stack-description">{stack.description}</p>
-              <button 
-                className="edit-stack-btn" 
+              <button
+                className="edit-stack-btn"
                 onClick={() => handleEditStack(stack.id)}
               >
                 Edit Stack
@@ -152,8 +182,8 @@ function App() {
                 <button className="cancel-btn" onClick={handleCloseModal}>
                   Cancel
                 </button>
-                <button 
-                  className="create-btn" 
+                <button
+                  className="create-btn"
                   onClick={handleCreateStack}
                   disabled={!newStackName.trim()}
                 >

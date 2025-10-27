@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect } from 'react'
 import ReactFlow, {
   Controls,
   Background,
@@ -7,6 +7,7 @@ import ReactFlow, {
   addEdge,
 } from 'reactflow'
 import { Save } from 'lucide-react'
+import axios from 'axios'
 import 'reactflow/dist/style.css'
 
 // Component types
@@ -40,9 +41,86 @@ const componentTypes = [
 const initialNodes = []
 const initialEdges = []
 
-function WorkflowBuilder({ onBack }) {
+function WorkflowBuilder({ onBack, stackId, stackName }) {
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
+
+  // Load saved workflow on mount
+  useEffect(() => {
+    if (stackId) {
+      loadWorkflow()
+    }
+  }, [stackId])
+
+  const loadWorkflow = async () => {
+    try {
+      console.log(`Loading workflow for stack: ${stackId}`)
+      const response = await axios.get(`http://127.0.0.1:8000/workflows/${stackId}`)
+      const workflowData = response.data
+      console.log('Loaded workflow data:', workflowData)
+      if (workflowData.nodes) setNodes(workflowData.nodes)
+      if (workflowData.edges) setEdges(workflowData.edges)
+      console.log(`Workflow loaded for stack ${stackId}:`, workflowData)
+    } catch (error) {
+      console.log(`No existing workflow found for stack ${stackId}:`, error.response?.status)
+      // This is normal for new stacks
+    }
+  }
+
+  // Auto-save functionality
+  const saveWorkflow = useCallback(async () => {
+    if (stackId && (nodes.length > 0 || edges.length > 0)) {
+      try {
+        console.log('Saving workflow with data:', {
+          stack_id: stackId,
+          nodes: nodes,
+          edges: edges
+        })
+        
+        const response = await axios.post('http://127.0.0.1:8000/workflows', {
+          stack_id: stackId,
+          nodes: nodes,
+          edges: edges
+        })
+        
+        console.log('Workflow saved successfully:', response.data)
+      } catch (error) {
+        console.error('Error saving workflow:', error.response?.data || error.message)
+      }
+    }
+  }, [nodes, edges, stackId])
+
+  // Auto-save when component unmounts
+  useEffect(() => {
+    return () => {
+      // Cleanup function - auto-save when component unmounts
+      if (stackId && (nodes.length > 0 || edges.length > 0)) {
+        saveWorkflow()
+      }
+    }
+  }, [stackId, nodes, edges, saveWorkflow])
+
+  // Auto-save when nodes or edges change
+  useEffect(() => {
+    if (nodes.length > 0 || edges.length > 0) {
+      const timeoutId = setTimeout(saveWorkflow, 1000) // Auto-save after 1 second of inactivity
+      return () => clearTimeout(timeoutId)
+    }
+  }, [nodes, edges, saveWorkflow])
+
+  // Manual save function
+  const handleSave = async () => {
+    if (stackId) {
+      try {
+        await saveWorkflow()
+        alert(`Workflow saved successfully for stack ${stackName || stackId}!`)
+      } catch (error) {
+        alert('Failed to save workflow. Please try again.')
+      }
+    } else {
+      alert('No stack selected!')
+    }
+  }
 
   const onConnect = useCallback(
     (params) => setEdges((eds) => addEdge(params, eds)),
@@ -117,18 +195,35 @@ function WorkflowBuilder({ onBack }) {
     event.dataTransfer.dropEffect = 'move'
   }
 
+  const handleBack = async () => {
+    // Auto-save before going back
+    if (stackId && (nodes.length > 0 || edges.length > 0)) {
+      try {
+        await saveWorkflow()
+        alert(`Workflow auto-saved before navigating back`)
+      } catch (error) {
+        console.error('Error auto-saving before back navigation:', error)
+      }
+    }
+    
+    // Navigate back
+    onBack()
+  }
 
   return (
     <div className="workflow-builder">
       <div className="builder-header">
         <div className="header-left">
+          <button className="back-btn" onClick={handleBack}>
+            ← Back
+          </button>
           <div className="logo">
             <img src="/logo.png" alt="GenAI Stack Logo" className="logo-icon" />
             <span className="logo-text">GenAI Stack</span>
           </div>
         </div>
         <div className="builder-actions">
-          <button className="save-btn">
+          <button className="save-btn" onClick={handleSave}>
             <Save size={16} />
             Save
           </button>
@@ -140,7 +235,7 @@ function WorkflowBuilder({ onBack }) {
         {/* Component Library */}
         <div className="component-library">
           <div className="library-header">
-            <h3>Chat With AI</h3>
+            <h3>{stackName || 'Chat With AI'}</h3>
             <button className="doc-btn">📄</button>
           </div>
           <h4>Components</h4>
