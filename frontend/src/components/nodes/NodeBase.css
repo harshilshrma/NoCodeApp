@@ -1,0 +1,151 @@
+.node-base {
+  width: 260px;
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 2px 8px #eee;
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+  background: #d7d7e0;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  position: relative;
+}
+
+.node-icon {
+  margin-right: 8px;
+  margin-top: 5px;
+}
+
+.node-title {
+  font-weight: 600;
+  flex: 1;
+}
+
+.node-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  color: #888;
+  margin-left: 8px;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  line-height: 1;
+}
+
+.node-delete:hover {
+  color: #ef4444;
+  transition: color 0.2s;
+}
+
+.node-desc {
+  font-size: 12px;
+  color: #666;
+  padding: 4px 12px 0 12px;
+  background: #f7f7fa;
+  border-bottom: 1px solid #eee;
+}
+
+.node-name {
+  background: #f2f2f8;
+  color: #3f3c3c;
+  font-weight: 500;
+  text-align: center;
+  border-radius: 4px;
+  margin: 8px 12px 8px 12px;
+  padding: 4px 0;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.node-name-input {
+  width: 90%;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: center;
+  border: 1px solid #bbb;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+.node-checkbox {
+  margin-right: 4px;
+}
+
+.node-name-error {
+  color: red;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.node-fields {
+  padding: 4px 14px 12px 14px;
+}
+
+.node-field {
+  margin-bottom: 8px;
+}
+
+.node-label {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.node-required {
+  color: red;
+}
+
+.node-helper {
+  margin-left: 4px;
+  cursor: help;
+  color: #888;
+}
+
+.node-input {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-top: 3px;
+}
+
+.node-select {
+  width: 100%;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  margin-top: 6px;
+}
+
+.node-toggle {
+  margin-left: 8px;
+}
+
+.node-checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.node-checkbox-label {
+  font-size: 13px;
+  color: #555;
+}
+
+.node-base, .node-fields, .node-input, .node-select {
+  box-sizing: border-box;
+}
+
+.node-base:hover {
+  border: 1px solid #6366f1;
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18), 0 2px 16px #b3b3fa;
+  z-index: 2;
+}

@@ -1,32 +1,54 @@
-import React from 'react'
+// UserInputNode.jsx
 
-const UserInputNode = ({ data, isConnectable }) => {
+import React, { useState } from 'react';
+import { Position } from 'reactflow';
+import NodeBase from './NodeBase';
+import { MdInput } from "react-icons/md";
+
+export const UserInputNode = ({ id, data }) => {
+  const [currName, setCurrName] = useState(data?.inputName || id.replace('user-input-', 'user_input_'));
+  const [inputType, setInputType] = useState(data?.inputType || 'Text');
+  const [query, setQuery] = useState(data?.query || '');
+
+  const handleDelete = () => {
+    // This will be handled by the parent component
+    console.log('Delete user input node:', id);
+  };
+
   return (
-    <div className="custom-node user-input-node">
-      {/* Header */}
-      <div className="node-header">
-        <div className="node-icon">📄</div>
-        <div className="node-title">User Input</div>
-        <div className="node-settings">⚙️</div>
-      </div>
-      
-      {/* Content */}
-      <div className="node-content">
-        <div className="input-prompt">
-          Enter point for querys
-        </div>
-        <div className="field-label">Query</div>
-        <textarea 
-          className="query-input"
-          placeholder="Write your query here"
-          defaultValue={data.query || ''}
-        />
-      </div>
-      
-      {/* Output Handle */}
-      <div className="node-handle output-handle" />
-    </div>
-  )
-}
-
-export default UserInputNode
+    <NodeBase
+      id={id}
+      title="User Query"
+      icon={<MdInput size={20} color="#555" />}
+      description="Accepts user queries via a simple interface"
+      nodeName={currName}
+      onNameChange={setCurrName}
+      fields={[
+        {
+          label: 'Input Type',
+          type: 'select',
+          value: inputType,
+          onChange: (e) => setInputType(e.target.value),
+          options: ['Text', 'File'],
+          helper: 'Select how users will input their queries',
+        },
+        {
+          label: 'Query',
+          type: 'textarea',
+          value: query,
+          onChange: (e) => setQuery(e.target.value),
+          placeholder: 'Enter your query here...',
+          helper: 'The user query to process',
+        },
+      ]}
+      handles={[
+        {
+          type: 'source',
+          position: Position.Right,
+          id: `${id}-query`,
+        },
+      ]}
+      onDelete={handleDelete}
+    />
+  );
+};

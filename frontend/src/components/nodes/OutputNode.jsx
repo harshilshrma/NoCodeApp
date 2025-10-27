@@ -1,36 +1,53 @@
-import React from 'react'
+// OutputNode.jsx
 
-const OutputNode = ({ data, isConnectable }) => {
+import React, { useState } from 'react';
+import { Position } from 'reactflow';
+import NodeBase from './NodeBase';
+import { MdOutlineOutput } from "react-icons/md";
+
+export const OutputNode = ({ id, data }) => {
+  const [currName, setCurrName] = useState(data?.outputName || id.replace('output-', 'output_'));
+  const [outputType, setOutputType] = useState(data?.outputType || 'Text');
+  const [response, setResponse] = useState(data?.response || '');
+
+  const handleDelete = () => {
+    console.log('Delete output node:', id);
+  };
+
   return (
-    <div className="custom-node output-node">
-      {/* Header */}
-      <div className="node-header">
-        <div className="node-icon">📤</div>
-        <div className="node-title">Output</div>
-        <div className="node-settings">⚙️</div>
-      </div>
-      
-      {/* Content */}
-      <div className="node-content">
-        <div className="description-text">
-          Output of the result nodes as text
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">Output Text</div>
-          <textarea 
-            className="output-textarea"
-            placeholder="Output will be generated based on query"
-            defaultValue={data.outputText || ''}
-            readOnly
-          />
-        </div>
-      </div>
-      
-      {/* Input Handle */}
-      <div className="node-handle input-handle" />
-    </div>
-  )
-}
-
-export default OutputNode
+    <NodeBase
+      id={id}
+      title="Output"
+      icon={<MdOutlineOutput size={20} color="#555" />}
+      description="Display responses to users in chat interface"
+      nodeName={currName}
+      onNameChange={setCurrName}
+      fields={[
+        {
+          label: 'Output Type',
+          type: 'select',
+          value: outputType,
+          onChange: (e) => setOutputType(e.target.value),
+          options: ['Text', 'Markdown', 'JSON'],
+          helper: 'Format for displaying responses',
+        },
+        {
+          label: 'Response',
+          type: 'textarea',
+          value: response,
+          onChange: (e) => setResponse(e.target.value),
+          placeholder: 'Response will be generated based on query...',
+          helper: 'The final response to display to the user',
+        },
+      ]}
+      handles={[
+        {
+          type: 'target',
+          position: Position.Left,
+          id: `${id}-input`,
+        },
+      ]}
+      onDelete={handleDelete}
+    />
+  );
+};

@@ -7,15 +7,17 @@ import ReactFlow, {
   addEdge,
 } from 'reactflow'
 import { Save } from 'lucide-react'
+import { MdInput, MdLibraryBooks, MdOutlineOutput } from 'react-icons/md'
+import { SiOpenai } from 'react-icons/si'
 import axios from 'axios'
 import 'reactflow/dist/style.css'
-import './nodes/NodeStyles.css'
+import './WorkflowBuilder.css'
 
 // Import custom node components
-import UserInputNode from './nodes/UserInputNode'
-import KnowledgeBaseNode from './nodes/KnowledgeBaseNode'
-import LLMEngineNode from './nodes/LLMEngineNode'
-import OutputNode from './nodes/OutputNode'
+import { UserInputNode } from './nodes/UserInputNode'
+import { KnowledgeBaseNode } from './nodes/KnowledgeBaseNode'
+import { LLMEngineNode } from './nodes/LLMEngineNode'
+import { OutputNode } from './nodes/OutputNode'
 
 // Define custom node types for React Flow
 const nodeTypes = {
@@ -25,31 +27,33 @@ const nodeTypes = {
   'output': OutputNode,
 }
 
+console.log('Node types loaded:', nodeTypes)
+
 // Component types
 const componentTypes = [
   {
     id: 'user-input',
     name: 'User Query',
     description: 'Accepts user queries via a simple interface',
-    color: '#e3f2fd',
+    icon: <MdInput size={20} color="#555" />,
   },
   {
     id: 'knowledge-base',
     name: 'Knowledge Base',
     description: 'Upload and process documents',
-    color: '#e8f5e8',
+    icon: <MdLibraryBooks size={20} color="#555" />,
   },
   {
     id: 'llm-engine',
     name: 'LLM Engine',
     description: 'Process queries with language models',
-    color: '#fff3e0',
+    icon: <SiOpenai size={20} color="#555" />,
   },
   {
     id: 'output',
     name: 'Output',
     description: 'Display responses to users',
-    color: '#fce4ec',
+    icon: <MdOutlineOutput size={20} color="#555" />,
   },
 ]
 
@@ -57,17 +61,15 @@ const initialNodes = []
 const initialEdges = []
 
 function WorkflowBuilder({ onBack, stackId, stackName }) {
+  console.log('WorkflowBuilder rendered with:', { onBack, stackId, stackName })
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges)
 
-  // Load saved workflow on mount
-  useEffect(() => {
-    if (stackId) {
-      loadWorkflow()
-    }
-  }, [stackId])
+  console.log('Current nodes:', nodes)
+  console.log('Current edges:', edges)
+  console.log('Node types:', nodeTypes)
 
-  const loadWorkflow = async () => {
+  const loadWorkflow = useCallback(async () => {
     try {
       console.log(`Loading workflow for stack: ${stackId}`)
       const response = await axios.get(`http://127.0.0.1:8000/workflows/${stackId}`)
@@ -80,7 +82,14 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
       console.log(`No existing workflow found for stack ${stackId}:`, error.response?.status)
       // This is normal for new stacks
     }
-  }
+  }, [stackId, setNodes, setEdges])
+
+  // Load saved workflow on mount
+  useEffect(() => {
+    if (stackId) {
+      loadWorkflow()
+    }
+  }, [stackId, loadWorkflow])
 
   // Auto-save functionality
   const saveWorkflow = useCallback(async () => {
@@ -129,7 +138,8 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
       try {
         await saveWorkflow()
         alert(`Workflow saved successfully for stack ${stackName || stackId}!`)
-      } catch (error) {
+      } catch (err) {
+        console.error('Error saving workflow:', err)
         alert('Failed to save workflow. Please try again.')
       }
     } else {
@@ -177,6 +187,7 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
     event.preventDefault()
     
     const componentType = JSON.parse(event.dataTransfer.getData('application/reactflow'))
+    console.log('Dropped component:', componentType)
     
     const position = {
       x: event.clientX - 300, // Subtract sidebar width
@@ -191,9 +202,9 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
         label: componentType.name,
         type: componentType.id,
         description: componentType.description,
-        color: componentType.color,
       },
     }
+    console.log('Creating new node:', newNode)
     setNodes((nds) => [...nds, newNode])
   }
 
@@ -208,8 +219,8 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
       try {
         await saveWorkflow()
         alert(`Workflow auto-saved before navigating back`)
-      } catch (error) {
-        console.error('Error auto-saving before back navigation:', error)
+      } catch (err) {
+        console.error('Error auto-saving before back navigation:', err)
       }
     }
     
@@ -258,10 +269,7 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
                 }}
               >
                 <div className="component-icon">
-                  {component.id === 'user-input' && '📄'}
-                  {component.id === 'knowledge-base' && '📚'}
-                  {component.id === 'llm-engine' && '✨'}
-                  {component.id === 'output' && '📤'}
+                  {component.icon}
                 </div>
                 <div className="component-info">
                   <div className="component-name">{component.name}</div>
@@ -279,26 +287,21 @@ function WorkflowBuilder({ onBack, stackId, stackName }) {
           onDrop={onDrop}
           onDragOver={onDragOver}
         >
-          {nodes.length === 0 ? (
-            <div className="empty-canvas">
-              <div className="empty-icon">⬜</div>
-              <p>Drag & drop to get started</p>
-            </div>
-          ) : (
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={onNodesChange}
-              onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
-              fitView
-              proOptions={{ hideAttribution: true }}
-              nodeTypes={nodeTypes}
-            >
-              <Controls />
-              <Background variant="dots" gap={12} size={1} />
-            </ReactFlow>
-          )}
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            fitView
+            proOptions={{ hideAttribution: true }}
+            nodeTypes={nodeTypes}
+            style={{ width: '100%', height: '100%' }}
+            defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+          >
+            <Controls />
+            <Background variant="dots" gap={12} size={1} color="#e0e0e0" />
+          </ReactFlow>
         </div>
 
       </div>

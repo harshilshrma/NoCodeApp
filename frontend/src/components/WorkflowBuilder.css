@@ -97,6 +97,7 @@
   flex: 1;
   display: flex;
   height: calc(100vh - 80px);
+  min-height: 500px;
 }
 
 .component-library {
@@ -174,6 +175,36 @@
   transform: scale(0.95);
 }
 
+/* Draggable node styles */
+.draggable-node {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: white;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  cursor: grab;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.draggable-node:hover {
+  border-color: #6366f1;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.15);
+}
+
+.draggable-node-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.draggable-node-label {
+  font-weight: 500;
+  color: #374151;
+}
+
 .component-icon {
   font-size: 1rem;
   width: 20px;
@@ -209,15 +240,19 @@
   flex: 1;
   background: #f8f9fa;
   position: relative;
+  height: calc(100vh - 80px); /* Ensure proper height */
+  min-height: 500px; /* Minimum height */
 }
 
-.empty-canvas {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* React Flow specific styles */
+.react-flow {
   height: 100%;
-  color: #6b7280;
+  width: 100%;
+}
+
+.react-flow__renderer {
+  height: 100%;
+  width: 100%;
 }
 
 .empty-icon {

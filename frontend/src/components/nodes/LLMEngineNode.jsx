@@ -1,72 +1,101 @@
-import React from 'react'
+// LLMEngineNode.jsx
 
-const LLMEngineNode = ({ data, isConnectable }) => {
+import React, { useState } from 'react';
+import { Position } from 'reactflow';
+import NodeBase from './NodeBase';
+import { SiOpenai } from "react-icons/si";
+
+const MODELS = ['gpt-4o-mini', 'gpt-4o', 'gpt-3.5-turbo', 'gpt-4-turbo'];
+
+export const LLMEngineNode = ({ id, data }) => {
+  const [currName, setCurrName] = useState(data?.llmName || id.replace('llm-engine-', 'llm_'));
+  const [model, setModel] = useState(data?.model || MODELS[0]);
+  const [apiKey, setApiKey] = useState(data?.apiKey || '');
+  const [systemPrompt, setSystemPrompt] = useState(data?.systemPrompt || 'You are a helpful AI assistant.');
+  const [temperature, setTemperature] = useState(data?.temperature || 0.7);
+  const [enableWebSearch, setEnableWebSearch] = useState(data?.enableWebSearch || false);
+  const [serpApiKey, setSerpApiKey] = useState(data?.serpApiKey || '');
+
+  const handleDelete = () => {
+    console.log('Delete LLM engine node:', id);
+  };
+
   return (
-    <div className="custom-node llm-engine-node">
-      {/* Header */}
-      <div className="node-header">
-        <div className="node-icon">✨</div>
-        <div className="node-title">LLM (OpenAI)</div>
-        <div className="node-settings">⚙️</div>
-      </div>
-      
-      {/* Content */}
-      <div className="node-content">
-        <div className="description-text">
-          Run a query with OpenAI LLM
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">Model</div>
-          <select className="model-select" defaultValue={data.model || 'GPT 4o-Mini'}>
-            <option value="GPT 4o-Mini">GPT 4o-Mini</option>
-            <option value="GPT-4">GPT-4</option>
-            <option value="GPT-3.5-turbo">GPT-3.5-turbo</option>
-          </select>
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">API Key</div>
-          <div className="api-key-input">
-            <input type="password" placeholder="Enter API key" defaultValue={data.apiKey || ''} />
-            <button className="toggle-visibility">👁️</button>
-          </div>
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">Prompt</div>
-          <textarea 
-            className="prompt-textarea"
-            defaultValue={data.prompt || 'You are a helpful PDF assistant. Use web search if the PDF lacks context\nCONTEXT: {context}\nUser Query: {query}'}
-          />
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">Temperature</div>
-          <input type="number" step="0.1" min="0" max="2" defaultValue={data.temperature || 0.75} />
-        </div>
-        
-        <div className="field-group">
-          <label className="toggle-label">
-            <input type="checkbox" defaultChecked={data.webSearch || false} />
-            WebSearch Tool
-          </label>
-        </div>
-        
-        <div className="field-group">
-          <div className="field-label">SERF API</div>
-          <div className="api-key-input">
-            <input type="password" placeholder="Enter SERF API key" defaultValue={data.serfApiKey || ''} />
-            <button className="toggle-visibility">👁️</button>
-          </div>
-        </div>
-      </div>
-      
-      {/* Handles */}
-      <div className="node-handle input-handle" />
-      <div className="node-handle output-handle" />
-    </div>
-  )
-}
-
-export default LLMEngineNode
+    <NodeBase
+      id={id}
+      title="LLM Engine"
+      icon={<SiOpenai size={20} color="#555" />}
+      description="Process queries with language models"
+      nodeName={currName}
+      onNameChange={setCurrName}
+      fields={[
+        {
+          label: 'Model',
+          type: 'select',
+          value: model,
+          onChange: (e) => setModel(e.target.value),
+          options: MODELS,
+          helper: 'Select the LLM model to use',
+        },
+        {
+          label: 'API Key',
+          type: 'text',
+          value: apiKey,
+          onChange: (e) => setApiKey(e.target.value),
+          placeholder: 'Enter your OpenAI API key',
+          helper: 'Required for LLM API calls',
+        },
+        {
+          label: 'System Prompt',
+          type: 'textarea',
+          value: systemPrompt,
+          onChange: (e) => setSystemPrompt(e.target.value),
+          placeholder: 'You are a helpful AI assistant...',
+          helper: 'Instructions for the AI model',
+        },
+        {
+          label: 'Temperature',
+          type: 'text',
+          value: temperature,
+          onChange: (e) => setTemperature(e.target.value),
+          placeholder: '0.7',
+          helper: 'Controls randomness (0.0 to 1.0)',
+        },
+        {
+          label: 'Enable Web Search',
+          type: 'checkbox',
+          value: enableWebSearch,
+          onChange: (e) => setEnableWebSearch(e.target.checked),
+        },
+        {
+          label: 'SerpAPI Key',
+          type: 'text',
+          value: serpApiKey,
+          onChange: (e) => setSerpApiKey(e.target.value),
+          placeholder: 'Enter your SerpAPI key',
+          helper: 'Required for web search functionality',
+        },
+      ]}
+      handles={[
+        {
+          type: 'target',
+          position: Position.Left,
+          id: `${id}-query`,
+          style: { top: '30%' },
+        },
+        {
+          type: 'target',
+          position: Position.Left,
+          id: `${id}-context`,
+          style: { top: '70%' },
+        },
+        {
+          type: 'source',
+          position: Position.Right,
+          id: `${id}-response`,
+        },
+      ]}
+      onDelete={handleDelete}
+    />
+  );
+};
